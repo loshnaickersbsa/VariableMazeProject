@@ -11,26 +11,35 @@ import java.util.regex.Pattern;
 //
 public class MazeByDirectionPreference implements Comparable<MazeByDirectionPreference>{
 
-	int startPositionRow;
-	int endPositionRow;
+	int startPositionRow;	int endPositionRow;
 	int endPositionColumn;
 	int startPositionColumn;
 	int mazeRowsFromZero;
 	int mazeColumnsFromZero;
 	String fileName;
-	char[][] mazeStructure;
+	private char[][] originalStructure;
+	private char[][] mazeStructure;
 	int routeLengthSize;
 	private int storeLength;
+	
+	public String getDirectionPreference() {
+		return directionPreference;
+	}
+
 	private String directionPreference; 
 
-	MazeByDirectionPreference(String fileName , String directionPreference)
+	MazeByDirectionPreference(String fileName , String directionPreference) throws IOException
 	{
 		this.fileName=fileName;
 		this.directionPreference = directionPreference;
 		loadTheData();
+		storeOriginalArray();
 		findPath(startPositionRow, startPositionColumn);
 		routeLengthSize=countStars();
 	}
+
+
+
 
 	/*
 	 * 
@@ -39,6 +48,35 @@ public class MazeByDirectionPreference implements Comparable<MazeByDirectionPref
 	 * 3)print the paths
 	 * 
 	 */
+
+
+
+	private void storeOriginalArray() {
+		for (int row = 0; row<= mazeRowsFromZero; row++) 
+		{
+			for (int col= 0; col <= mazeColumnsFromZero; col ++) {
+				originalStructure[row][col] = mazeStructure[row][col];
+			}
+		}
+
+
+
+	}
+
+
+
+
+	public char[][] getOriginalStructure() {
+		return originalStructure;
+	}
+
+
+
+
+	public char[][] getMazeStructure() {
+		return mazeStructure;
+	}
+
 
 
 
@@ -58,15 +96,46 @@ public class MazeByDirectionPreference implements Comparable<MazeByDirectionPref
 		return returnCount;
 	}
 
-	private void printMaze() {
-		// TODO Auto-generated method stub
+	String printMaze(char[][] mazeStructureIn , char ... options) {
 
-		for (int row = 0; row<= mazeRowsFromZero; row++) {
-			for (int col= 0; col <= mazeColumnsFromZero; col ++) {
-				System.out.print(mazeStructure[row][col]);
+		String returnString = null;
+		returnString="";
+		if (mazeStructure != null)
+		{
+			for (int row = 0; row<= mazeRowsFromZero; row++) {
+				for (int col= 0; col <= mazeColumnsFromZero; col ++) {
+					if (options.length > 0)
+					{
+						if (returnString.isEmpty())
+						{
+							returnString=Character.toString(mazeStructureIn[row][col]);					}
+						else
+						{
+							returnString+=mazeStructureIn[row][col];
+						}
+						
+					}
+					else
+					{
+					  System.out.print(mazeStructureIn[row][col]);
+					}
+				}
+				if (options.length > 0)
+				{
+					returnString+="\n";
+				}
+				else
+				{
+					System.out.println();
+				}
 			}
-			System.out.println();
 		}
+		else
+		{
+			System.out.println("There is a problem with this maze : " + this.fileName );
+		}
+		return directionPreference + "\n" + returnString;
+		
 
 	}
 
@@ -134,9 +203,9 @@ public class MazeByDirectionPreference implements Comparable<MazeByDirectionPref
 	}
 
 
-	private void loadTheData() {
+	private void loadTheData() throws IOException {
 		// TODO Auto-generated method stub
-		File filein = new File("resources/" +this.fileName);
+		File filein = new File(this.fileName);
 		BufferedReader bR=null;
 
 		int storeLength=0;
@@ -172,6 +241,7 @@ public class MazeByDirectionPreference implements Comparable<MazeByDirectionPref
 			}
 
 			this.mazeStructure = new char[matrixList.size()][storeLength];
+			this.originalStructure= new char[matrixList.size()][storeLength];
 
 			this.mazeColumnsFromZero= storeLength-1;
 			this.mazeRowsFromZero= matrixList.size() - 1;
@@ -247,16 +317,63 @@ public class MazeByDirectionPreference implements Comparable<MazeByDirectionPref
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
+
 		ArrayList<MazeByDirectionPreference> mazeList = new ArrayList<>(); 
-		mazeList.add(new MazeByDirectionPreference("map.txt" , "NEWS") );
-		mazeList.get(0).printMaze();
-		mazeList.add(new MazeByDirectionPreference("map.txt" , "NWES"));
-		mazeList.add(new MazeByDirectionPreference("map.txt" , "SEWN"));
-		mazeList.add(new MazeByDirectionPreference("map.txt" , "SWEN"));
-		mazeList.add(new MazeByDirectionPreference("map.txt" , "WESN"));
-		mazeList.add(new MazeByDirectionPreference("map.txt" , "WENS"));
-		mazeList.add(new MazeByDirectionPreference("map.txt" , "ENSW"));
-		mazeList.add(new MazeByDirectionPreference("map.txt" , "ESNW"));
+		try {
+			mazeList.add(new MazeByDirectionPreference("resources/map.txt" , "NEWS") );
+		} catch (IOException e1) {
+			System.out.println(e1);
+		}
+
+		System.out.println("Original Structure");
+		mazeList.get(0).printMaze(mazeList.get(0).getOriginalStructure());
+
+		try 
+		{
+			mazeList.add(new MazeByDirectionPreference("resources/map.txt" , "NWES"));
+		}
+		catch (IOException io)
+		{
+			System.out.println(io);
+		}
+
+		try {
+			mazeList.add(new MazeByDirectionPreference("resources/map.txt" , "SEWN"));
+		} catch (IOException io) 
+		{
+			System.out.println(io);
+		}
+
+		try {
+			mazeList.add(new MazeByDirectionPreference("resources/map.txt" , "SWEN"));
+		} catch (IOException e) {
+			System.out.println(e);
+		}
+
+		try {
+			mazeList.add(new MazeByDirectionPreference("resources/map.txt" , "WESN"));
+		} catch (IOException e) {
+			System.out.println(e);
+		}
+
+		try {
+			mazeList.add(new MazeByDirectionPreference("resources/map.txt" , "WENS"));
+		} catch (IOException e) {
+			System.out.println(e);
+		}
+
+		try {
+			mazeList.add(new MazeByDirectionPreference("resources/map.txt" , "ENSW"));
+		} catch (IOException e) {
+			System.out.println(e);
+		}
+
+		try {
+			mazeList.add(new MazeByDirectionPreference("resources/map.txt" , "ESNW"));
+		} catch (IOException e) {
+			System.out.println(e);
+		}
+
 		Collections.sort(mazeList);
 		boolean first=true;
 		for (MazeByDirectionPreference maze: mazeList)
@@ -265,12 +382,12 @@ public class MazeByDirectionPreference implements Comparable<MazeByDirectionPref
 			if (first)
 			{
 				System.out.println("Best route using : " + maze.directionPreference);
-				maze.printMaze();
+				maze.printMaze(maze.getMazeStructure());;
 			}
 			else
 			{
 				System.out.println("Rest of routes ");
-				maze.printMaze();
+				maze.printMaze(maze.getMazeStructure());;
 			}
 			first=false;
 		}
